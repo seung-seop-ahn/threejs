@@ -5,6 +5,7 @@ import { FlyControls } from "three/examples/jsm/controls/FlyControls";
 import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import { TrackballControls } from "three/examples/jsm/controls/TrackballControls";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.shadowMap.enabled = true;
@@ -33,7 +34,7 @@ directionLight.shadow.camera.near = 0.1;
 directionLight.shadow.camera.far = 100;
 const directionLightHelper = new THREE.DirectionalLightHelper(directionLight, 1);
 scene.add(directionLight);
-scene.add(directionLightHelper);
+// scene.add(directionLightHelper);
 
 const floorGeometry = new THREE.PlaneGeometry(20, 20);
 const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
@@ -49,60 +50,48 @@ const box = new THREE.Mesh(boxGeometry, boxMaterial);
 box.position.set(0, 0.5, 0);
 box.castShadow = true;
 box.receiveShadow = true;
-scene.add(box);
+// scene.add(box);
 
-// const orbitControls = new OrbitControls(camera, renderer.domElement);
-// orbitControls.enableDamping = true;
-// orbitControls.dampingFactor = 0.03;
-// orbitControls.enableZoom = true;
-// orbitControls.enablePan = true;
-// orbitControls.enableRotate = true;
-// orbitControls.autoRotate = false;
-// orbitControls.autoRotateSpeed = 2;
-
-// orbitControls.maxPolarAngle = Math.PI / 2;
-// orbitControls.minPolarAngle = Math.PI / 4;
-// orbitControls.maxAzimuthAngle = Math.PI / 2;
-// orbitControls.minAzimuthAngle = -Math.PI / 2;
-
-// const flyControls = new FlyControls(camera, renderer.domElement);
-// flyControls.movementSpeed = 1;
-// flyControls.rollSpeed = 0.1;
-// flyControls.autoForward = false;
-
-// camera.position.set(0, 1, 5);
-// const firstPersonControls = new FirstPersonControls(camera, renderer.domElement);
-// firstPersonControls.movementSpeed = 1;
-// firstPersonControls.lookSpeed = 0.1;
-// firstPersonControls.rollSpeed = 0.1;
-// firstPersonControls.lookVertical = false;
-// firstPersonControls.autoForward = false;
-
-// camera.position.set(0, 1, 5);
-// const pointerLockControls = new PointerLockControls(camera, renderer.domElement);
-// window.addEventListener("click", () => {
-//   pointerLockControls.lock();
+const gltfLoader = new GLTFLoader();
+// * [Syncronous]
+// gltfLoader.load("/dancer.glb", (data) => {
+//   const character = data.scene;
+//   character.position.set(0, 0.8, 0);
+//   character.scale.set(0.01, 0.01, 0.01);
+//   scene.add(character);
 // });
 
-camera.position.set(0, 1, 5);
-const trackballControls = new TrackballControls(camera, renderer.domElement);
-trackballControls.rotateSpeed = 2;
-trackballControls.zoomSpeed = 1.5;
-trackballControls.panSpeed = 0.5;
-trackballControls.noRotate = false;
-trackballControls.noZoom = false;
-trackballControls.noPan = false;
-trackballControls.staticMoving = false;
-trackballControls.dynamicDampingFactor = 0.05;
+// * [Asynchronous]
+const gltf = await gltfLoader.loadAsync('/dancer.glb')
+const character = gltf.scene;
+const animationClips = gltf.animations;
+character.position.set(0, 0.8, 0);
+character.scale.set(0.01, 0.01, 0.01);
+character.castShadow = true;
+character.receiveShadow = true;
+character.traverse((child) => {
+  if (child instanceof THREE.Mesh) {
+    child.castShadow = true;
+    child.receiveShadow = true;
+  }
+});
+scene.add(character);
 
-const target = new THREE.Mesh(
-  new THREE.SphereGeometry(0.5), 
-  new THREE.MeshStandardMaterial({ color: 0x0000ff })
-);
-target.position.set(4, 0.5, 0);
-scene.add(target);
+const mixer = new THREE.AnimationMixer(character);
+const action = mixer.clipAction(animationClips[3]);
+action.setLoop(THREE.LoopPingPong);
+// action.setDuration(10);
+// action.setEffectiveTimeScale(0.5);
+// action.setEffectiveWeight(0.5);
+action.play();
 
-trackballControls.target = target.position;
+// setTimeout(() => {
+//   mixer.clipAction(animationClips[3]).paused =true;
+// }, 3000);
+
+const orbitControls = new OrbitControls(camera, renderer.domElement);
+orbitControls.enableDamping = true;
+orbitControls.dampingFactor = 0.03;
 
 window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -115,10 +104,10 @@ const clock = new THREE.Clock();
 const render = () => {
   renderer.render(scene, camera);
   requestAnimationFrame(render);
-  // orbitControls.update();
-  // flyControls.update(clock.getDelta());
-  // firstPersonControls.update(clock.getDelta());
-  trackballControls.update(clock.getDelta());
+  orbitControls.update();
+  if(mixer) {
+    mixer.update(clock.getDelta());
+  }
 }
 
 render();
