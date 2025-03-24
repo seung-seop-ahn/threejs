@@ -9,8 +9,9 @@ document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.x = 5;
+camera.position.y = 5;
 camera.position.z = 5;
-camera.position.y = 1;
 
 const directionLight = new THREE.DirectionalLight(0xffffff, 5);
 directionLight.castShadow = true;
@@ -27,109 +28,98 @@ floor.receiveShadow = true;
 floor.castShadow = true;
 scene.add(floor);
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-const mesh = new THREE.Mesh(geometry, material);
-mesh.position.y = 0.5;
-mesh.castShadow = true;
-mesh.receiveShadow = true;
-scene.add(mesh);
+const frontSideGeometry = new THREE.BoxGeometry(1, 1, 1);
+const frontSideMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffff, side: THREE.FrontSide });
+const frontSide = new THREE.Mesh(frontSideGeometry, frontSideMaterial);
+frontSide.position.y = 0.5
+frontSide.position.z = 4;
+frontSide.castShadow = true;
+frontSide.receiveShadow = true;
+scene.add(frontSide);
 
-const capsuleGeometry = new THREE.CapsuleGeometry(1, 2, 20, 30);
-const capsuleMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff });
-const capsule = new THREE.Mesh(capsuleGeometry, capsuleMaterial);
-capsule.position.set(3, 1.75, 0);
-capsule.castShadow = true;
-capsule.receiveShadow = true;
-scene.add(capsule);
+const backSideGeometry = new THREE.BoxGeometry(1, 1, 1);
+const backSideMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00, side: THREE.BackSide });
+const backSide = new THREE.Mesh(backSideGeometry, backSideMaterial);
+backSide.position.set(2, 0.5, 4);
+backSide.position.y = 0.51;
+backSide.receiveShadow = true;
+scene.add(backSide);
 
-const cylinderGeometry = new THREE.CylinderGeometry(1, 1, 2);
-const cylinderMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
-const cylinder = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
-cylinder.position.set(-3, 1, 0);
-cylinder.castShadow = true;
-cylinder.receiveShadow = true;
-scene.add(cylinder);
+const doubleSideGeometry = new THREE.BoxGeometry(1, 1, 1);
+const doubleSideMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+const doubleSide = new THREE.Mesh(doubleSideGeometry, doubleSideMaterial);
+doubleSide.position.set(4, 0.5, 4);
+doubleSide.receiveShadow = true;
+scene.add(doubleSide);
 
-const torusGeometry = new THREE.TorusGeometry(0.5, 0.1, 16, 100);
-const torusMaterial = new THREE.MeshStandardMaterial({ color: 0xf0f0f0 });
-const torus = new THREE.Mesh(torusGeometry, torusMaterial);
-torus.position.set(0, 0.5, 1);
-torus.castShadow = true;
-torus.receiveShadow = true;
-scene.add(torus);
+const torusKnotGeometry = new THREE.TorusKnotGeometry(0.5, 0.15, 100, 20);
+const torusKnotMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff });
+torusKnotMaterial.roughness = 0.5;
+torusKnotMaterial.metalness = 1;
 
-const starShape = new THREE.Shape();
-starShape.moveTo(0, 1);
-starShape.lineTo(0.2, 0.2);
-starShape.lineTo(1, 0.2);
-starShape.lineTo(0.4, -0.1);
-starShape.lineTo(0.6, -1);
-starShape.lineTo(0, -0.5);
-starShape.lineTo(-0.6, -1);
-starShape.lineTo(-0.4, -0.1);
-starShape.lineTo(-1, 0.2);
-starShape.lineTo(-0.2, 0.2);
-starShape.lineTo(0, 1);
+const torusKnot = new THREE.Mesh(torusKnotGeometry, torusKnotMaterial);
+torusKnot.position.set(-4, 1, 0);
+torusKnot.castShadow = true;
+torusKnot.receiveShadow = true;
+scene.add(torusKnot);
 
-const starGeometry = new THREE.ShapeGeometry(starShape);
-const starMaterial = new THREE.MeshStandardMaterial({ color: 0xff00ff });
-const star = new THREE.Mesh(starGeometry, starMaterial);
-star.position.set(0, 1, 2);
-star.castShadow = true;
-star.receiveShadow = true;
-scene.add(star);
+const torusKnotLamberMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+torusKnotLamberMaterial.emissive = new THREE.Color(0x0000ff);
+torusKnotLamberMaterial.emissiveIntensity = 0.2;
 
-const extrudeSettings = {
-  steps: 1,
-  depth: 0.1,
-  bevelEnabled: true,
-  bevelThickness: 0.1,
-  bevelSize: 0.3,
-  bevelSegments: 100,
-  bevelOffset: 0,
-}
+const torusKnotLamber = new THREE.Mesh(torusKnotGeometry, torusKnotLamberMaterial);
+torusKnotLamber.position.set(-2, 1, 0);
+torusKnotLamber.castShadow = true;
+torusKnotLamber.receiveShadow = true;
+scene.add(torusKnotLamber);
 
-const extrudeGeometry = new THREE.ExtrudeGeometry(starShape, extrudeSettings);
-const extrudeMaterial = new THREE.MeshStandardMaterial({ color: 0x0ddaaf });
-const extrude = new THREE.Mesh(extrudeGeometry, extrudeMaterial);
-extrude.position.set(2, 1.3, 2);
-extrude.castShadow = true;
-extrude.receiveShadow = true;
-scene.add(extrude);
+const torusKnotPhongMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+torusKnotPhongMaterial.emissive = new THREE.Color(0x00ff00);
+torusKnotPhongMaterial.emissiveIntensity = 0.2;
+torusKnotPhongMaterial.specular = new THREE.Color(0x0000ff);
+torusKnotPhongMaterial.shininess = 100;
 
-const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0x98daaf });
-const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-sphere.position.set(0, 1, -3);
-sphere.castShadow = true;
-sphere.receiveShadow = true;
-scene.add(sphere);
+const torusKnotPhong = new THREE.Mesh(torusKnotGeometry, torusKnotPhongMaterial);
+torusKnotPhong.position.set(0, 1, 0);
+torusKnotPhong.castShadow = true;
+torusKnotPhong.receiveShadow = true;
+scene.add(torusKnotPhong);
 
-const numPoints = 1000;
-const positions = new Float32Array(numPoints * 3);
+const torusKnotBasicMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const torusKnotBasic = new THREE.Mesh(torusKnotGeometry, torusKnotBasicMaterial);
+torusKnotBasic.position.set(2, 1, 0);
+torusKnotBasic.castShadow = true;
+torusKnotBasic.receiveShadow = true;
+scene.add(torusKnotBasic);
 
-for(let i = 0; i < numPoints; i++) {
-  const x = (Math.random() - 0.5) * 1;
-  const y = (Math.random() - 0.5) * 1;
-  const z = (Math.random() - 0.5) * 1;
+const torusKnotDepthMaterial = new THREE.MeshDepthMaterial({ color: 0xffffff });
+torusKnotDepthMaterial.opacity = 0.5;
+torusKnotDepthMaterial.transparent = true;
 
-  positions[i * 3] = x;
-  positions[i * 3 + 1] = y;
-  positions[i * 3 + 2] = z;
-}
+const torusKnotDepth = new THREE.Mesh(torusKnotGeometry, torusKnotDepthMaterial);
+torusKnotDepth.position.set(4, 1, 0);
+torusKnotBasic.castShadow = true;
+torusKnotBasic.receiveShadow = true;
+scene.add(torusKnotDepth);
 
-const pointsGeometry = new THREE.BufferGeometry();
-pointsGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+const textureLoader = new THREE.TextureLoader();
 
-const pointsMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.05 });
-const points = new THREE.Points(pointsGeometry, pointsMaterial);
-points.position.set(0, 0, -5);
-scene.add(points);
+// * [Syncronous]
+// textureLoader.load("/dgdg.png", (tx) => {
+// const textureBoxGeometry = new THREE.BoxGeometry(1, 1, 1);
+// const textureBoxMaterial = new THREE.MeshBasicMaterial({ map: tx });
+//   const textureBox = new THREE.Mesh(textureBoxGeometry, textureBoxMaterial);
+//   textureBox.position.set(6, 1, 0);
+//   scene.add(textureBox);
+// });
 
-const spherePoints = new THREE.Points(sphereGeometry, pointsMaterial);
-spherePoints.position.set(0, 3, -5);
-scene.add(spherePoints);
+// * [Asyncronous]
+const texture = await textureLoader.loadAsync("/dgdg.png");
+const textureBoxGeometry = new THREE.BoxGeometry(1, 1, 1);
+const textureBoxMaterial = new THREE.MeshBasicMaterial({ map: texture });
+const textureBox = new THREE.Mesh(textureBoxGeometry, textureBoxMaterial);
+textureBox.position.set(6, 1, 0);
+scene.add(textureBox);
 
 const orbitControls = new OrbitControls(camera, renderer.domElement);
 orbitControls.update();
@@ -144,6 +134,7 @@ window.addEventListener("resize", () => {
 const render = () => {
   renderer.render(scene, camera);
   requestAnimationFrame(render);
+  textureBox.rotation.y += 0.01;
 }
 
 render();
