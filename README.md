@@ -12,8 +12,12 @@ $ npm install three
 ## Usage
 
 ```sh
-
+$ npm run dev
 ```
+
+## Reference
+
+![](./images/perspective.jpg)
 
 ## Author
 
