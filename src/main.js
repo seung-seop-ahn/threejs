@@ -42,6 +42,7 @@ const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 floor.castShadow = true;
+floor.name = "FLOOR";
 scene.add(floor);
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -89,6 +90,21 @@ action.play();
 //   mixer.clipAction(animationClips[3]).paused =true;
 // }, 3000);
 
+
+const newPosition = new THREE.Vector3(0, 1, 0);
+const raycaster = new THREE.Raycaster();
+
+renderer.domElement.addEventListener("pointerdown", (event) => {
+  const x = (event.clientX / window.innerWidth) * 2 - 1;
+  const y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+  const intersects = raycaster.intersectObjects(scene.children);
+  const intersectFloor = intersects.find((intersect) => intersect.object.name === "FLOOR");
+  console.log(intersectFloor);
+  newPosition.copy(intersectFloor.point);
+  newPosition.y = 1;
+})
+
 const orbitControls = new OrbitControls(camera, renderer.domElement);
 orbitControls.enableDamping = true;
 orbitControls.dampingFactor = 0.03;
@@ -101,7 +117,25 @@ window.addEventListener("resize", () => {
 });
 
 const clock = new THREE.Clock();
+const targetVector = new THREE.Vector3();
 const render = () => {
+  character.lookAt(newPosition);
+  targetVector
+    .subVectors(newPosition, character.position)
+    .normalize()
+    .multiplyScalar(0.01);
+  
+  if(
+    Math.abs(character.position.x - newPosition.x) >= 1 || 
+    Math.abs(character.position.z - newPosition.z) >= 1
+  ) {
+    character.position.x += targetVector.x;
+    character.position.z += targetVector.z;
+    action.stop();
+  }
+
+  action.play();
+  
   renderer.render(scene, camera);
   requestAnimationFrame(render);
   orbitControls.update();
