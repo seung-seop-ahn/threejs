@@ -6,6 +6,7 @@
 
 ```sh
 $ npm create vite@latest threejs -- --template vanilla
+$ npm install three
 ```
 
 ## Usage
